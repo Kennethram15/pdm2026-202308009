@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:inkash/core/format/formato_moneda.dart';
+import 'package:inkash/features/home/domain/movimiento.dart';
+import 'package:inkash/features/home/presentation/controllers/home_controller.dart';
 import 'package:inkash/theme.dart';
+import 'package:inkash/features/home/presentation/widgets/movimiento_bottom_sheet.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({required this.controller, super.key});
 
+  final MovimientosController controller;
+
+  // La pantalla recibe los resultados desde el controlador.
   @override
   Widget build(BuildContext context) {
+    final totalGastado = controller.totalGastadoCentavos;
+    final saldoDisponible = controller.saldoDisponibleCentavos;
+    final movimientos = controller.movimientos;
+
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -21,30 +32,30 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 22),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   'TE QUEDAN DISPONIBLES',
                   style: TextStyle(fontSize: 11, color: kLima),
                 ),
                 Text(
-                  'Q2,796.50',
-                  style: TextStyle(
+                  formatQuetzales(saldoDisponible),
+                  style: const TextStyle(
                     fontSize: 52,
                     color: kTexto,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 LinearProgressIndicator(
-                  value: 0.57,
+                  value: totalGastado / controller.limiteMensualCentavos,
                   color: kLima,
                   minHeight: 8.0,
-                  // backgroundColor: Colors.blue,
                 ),
-                SizedBox(height: 7),
+                const SizedBox(height: 7),
                 Text(
-                  'Has usado Q3,703.50 de Q6,500.00',
-                  style: TextStyle(fontSize: 12),
+                  'Has usado ${formatQuetzales(totalGastado)} '
+                  'de ${formatQuetzales(controller.limiteMensualCentavos)}',
+                  style: const TextStyle(fontSize: 12),
                 ),
               ],
             ),
@@ -70,47 +81,24 @@ class HomePage extends StatelessWidget {
                 ),
               ],
             ),
-            filaMovimiento(
-              icon: Icons.directions_bus,
-              title: 'Uber al trabajo',
-              subtitle: 'Transporte · Tarjeta',
-              amount: '− Q38.00',
-              date: 'Hoy',
-            ),
-            filaMovimiento(
-              icon: Icons.shopping_cart,
-              title: 'Súper La Torre',
-              subtitle: 'Súper y comida · Tarjeta',
-              amount: '− Q285.50',
-              date: 'Ayer',
-            ),
-            filaMovimiento(
-              icon: Icons.arrow_upward,
-              title: 'Salario quincena',
-              subtitle: 'Ingreso · Banco',
-              amount: '+ Q4,200.00',
-              date: 'Ayer',
-              isIncome: true,
-            ),
-            filaMovimiento(
-              icon: Icons.local_cafe,
-              title: 'Café con Ana',
-              subtitle: 'Entretenimiento · Efectivo',
-              amount: '− Q65.00',
-              date: 'Ayer',
-            ),
-            filaMovimiento(
-              icon: Icons.bolt,
-              title: 'Recibo de luz (EEGSA)',
-              subtitle: 'Servicios · Banco',
-              amount: '− Q420.00',
-              date: 'Lun 20',
-            ),
+            ...movimientos.map(filaMovimiento),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
+        onTap: (index) {
+          // Para que funcione solo en el boton de + o agregar.
+          if (index != 2) return;
+          showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            useSafeArea: true,
+            showDragHandle: true,
+            backgroundColor: kSuperficie,
+            builder: (context) => const MovimientoBottomSheet(),
+          );
+        },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: kLima,
         items: const [
@@ -133,14 +121,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget filaMovimiento({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required String amount,
-    required String date,
-    bool isIncome = false,
-  }) {
+  Widget filaMovimiento(Movimiento movimiento) {
     return ListTile(
       leading: Container(
         width: 40,
@@ -149,21 +130,37 @@ class HomePage extends StatelessWidget {
           color: kIconoFondo,
           borderRadius: BorderRadius.circular(15),
         ),
-        child: Icon(icon, color: kLima),
+        child: Icon(_iconDataDe(movimiento.icono), color: kLima),
       ),
-      title: Text(title, style: TextStyle(color: kTexto)),
-      subtitle: Text(subtitle, style: TextStyle(color: kMuted)),
+      title: Text(movimiento.titulo, style: TextStyle(color: kTexto)),
+      subtitle: Text(movimiento.subtitulo, style: TextStyle(color: kMuted)),
       trailing: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            amount,
-            style: TextStyle(fontSize: 13, color: isIncome ? kLima : kTexto),
+            formatQuetzales(movimiento.montoFirmadoCentavos),
+            style: TextStyle(
+              fontSize: 13,
+              color: movimiento.esIngreso ? kLima : kTexto,
+            ),
           ),
-          Text(date, style: TextStyle(fontSize: 10, color: kMuted)),
+          Text(movimiento.fecha, style: TextStyle(fontSize: 10, color: kMuted)),
         ],
       ),
     );
+  }
+
+  // Convierte el nombre del icono (guardado como texto) a un IconData.
+  IconData _iconDataDe(String nombre) {
+    return switch (nombre) {
+      'directions_bus' => Icons.directions_bus,
+      'shopping_cart' => Icons.shopping_cart,
+      'arrow_upward' => Icons.arrow_upward,
+      'local_cafe' => Icons.local_cafe,
+      'bolt' => Icons.bolt,
+      'home' => Icons.home,
+      _ => Icons.attach_money,
+    };
   }
 
   Widget tarjetaHero(String title, String body) {
