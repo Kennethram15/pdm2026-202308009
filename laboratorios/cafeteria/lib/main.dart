@@ -25,6 +25,11 @@ class PedidoPage extends StatefulWidget {
 }
 
 class _PedidoPageState extends State<PedidoPage> {
+  int cantidadCafe=0;
+  int cantidadChanwis= 0;
+  int cantidadJugo = 0;
+  int cantidadHigado= 0 ;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,9 +43,13 @@ class _PedidoPageState extends State<PedidoPage> {
             ProductoPedido(
               nombre: 'Café snupi',
               precio: 10.00,
-              cantidad: 0,
+              cantidad: cantidadCafe,
               restar: () {},
-              sumar: () {},
+              sumar: () {
+                setState(() {
+                  cantidadCafe++;
+                });
+              },
             ),
 
             const Divider(),
@@ -48,9 +57,17 @@ class _PedidoPageState extends State<PedidoPage> {
             ProductoPedido(
               nombre: 'Chanwis de keso',
               precio: 25.00,
-              cantidad: 0,
-              restar: () {},
-              sumar: () {},
+              cantidad: cantidadChanwis,
+              restar: () {
+                setState(() {
+                  cantidadChanwis--;
+                });
+              },
+              sumar: () {
+                setState(() {
+                  cantidadChanwis++;
+                });
+              },
             ),
 
             const Divider(),
@@ -58,17 +75,33 @@ class _PedidoPageState extends State<PedidoPage> {
             ProductoPedido(
               nombre: 'Jugo de starbaks',
               precio: 12.00,
-              cantidad: 0,
-              restar: () {},
-              sumar: () {},
+              cantidad: cantidadJugo,
+              restar: () {
+                setState(() {
+                  cantidadJugo--;
+                });
+              },
+              sumar: () {
+                setState(() {
+                  cantidadJugo++;
+                });
+              },
             ),
             const Divider(),
              ProductoPedido(
               nombre: 'Hígado encebollao',
               precio: 20.00,
-              cantidad: 0,
-              restar: () {},
-              sumar: () {},
+              cantidad: cantidadHigado,
+              restar: () {
+                setState(() {
+                  cantidadHigado--;
+                });
+              },
+              sumar: () {
+                setState(() {
+                  cantidadHigado++;
+                });
+              },
             ),
           
 
