@@ -25,10 +25,26 @@ class PedidoPage extends StatefulWidget {
 }
 
 class _PedidoPageState extends State<PedidoPage> {
-  int cantidadCafe=0;
-  int cantidadChanwis= 0;
+  int cantidadCafe = 0;
+  int cantidadChanwis = 0;
   int cantidadJugo = 0;
-  int cantidadHigado= 0 ;
+  int cantidadHigado = 0;
+
+  double calcularTotal() {
+    return (cantidadCafe * 10.00) +
+        (cantidadChanwis * 25.00) +
+        (cantidadJugo * 12.00) +
+        (cantidadHigado * 20.00);
+  }
+
+  void vaciarPedido() {
+    setState(() {
+      cantidadCafe = 0;
+      cantidadChanwis = 0;
+      cantidadJugo = 0;
+      cantidadHigado = 0;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +60,13 @@ class _PedidoPageState extends State<PedidoPage> {
               nombre: 'Café snupi',
               precio: 10.00,
               cantidad: cantidadCafe,
-              restar: () {},
+              restar: () {
+                if (cantidadCafe > 0) {
+                  setState(() {
+                    cantidadCafe--;
+                  });
+                }
+              },
               sumar: () {
                 setState(() {
                   cantidadCafe++;
@@ -59,9 +81,11 @@ class _PedidoPageState extends State<PedidoPage> {
               precio: 25.00,
               cantidad: cantidadChanwis,
               restar: () {
-                setState(() {
-                  cantidadChanwis--;
-                });
+                if (cantidadChanwis > 0) {
+                  setState(() {
+                    cantidadChanwis--;
+                  });
+                }
               },
               sumar: () {
                 setState(() {
@@ -77,9 +101,11 @@ class _PedidoPageState extends State<PedidoPage> {
               precio: 12.00,
               cantidad: cantidadJugo,
               restar: () {
-                setState(() {
-                  cantidadJugo--;
-                });
+                if (cantidadJugo > 0) {
+                  setState(() {
+                    cantidadJugo--;
+                  });
+                }
               },
               sumar: () {
                 setState(() {
@@ -87,15 +113,19 @@ class _PedidoPageState extends State<PedidoPage> {
                 });
               },
             ),
+
             const Divider(),
-             ProductoPedido(
+
+            ProductoPedido(
               nombre: 'Hígado encebollao',
               precio: 20.00,
               cantidad: cantidadHigado,
               restar: () {
-                setState(() {
-                  cantidadHigado--;
-                });
+                if (cantidadHigado > 0) {
+                  setState(() {
+                    cantidadHigado--;
+                  });
+                }
               },
               sumar: () {
                 setState(() {
@@ -103,13 +133,12 @@ class _PedidoPageState extends State<PedidoPage> {
                 });
               },
             ),
-          
 
             const Spacer(),
 
-            const Text(
-              'Total: Q0.00',
-              style: TextStyle(
+            Text(
+              'Total: Q${calcularTotal().toStringAsFixed(2)}',
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -120,7 +149,7 @@ class _PedidoPageState extends State<PedidoPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: vaciarPedido,
                 child: const Text('Vaciar pedido'),
               ),
             ),
